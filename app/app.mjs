@@ -4,7 +4,7 @@ import * as path from "path";
 import { default as logger } from "morgan";
 import { default as cookieParser } from "cookie-parser";
 import * as http from "http";
-import { appDir } from "./util.js";
+import { appDir } from "./util.mjs";
 const __dirname = appDir;
 import {
   normalizePort,
@@ -12,9 +12,9 @@ import {
   onListening,
   handle404,
   basicErrorHandler,
-} from "./util.js";
+} from "./util.mjs";
 
-import { router as indexRouter } from "./routes/index.js";
+import { router as indexRouter } from "./routes/index.mjs";
 
 export const app = express();
 

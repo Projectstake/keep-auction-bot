@@ -1,4 +1,4 @@
-import { Deposit } from "./Deposit.js";
+import { Deposit } from "./Deposit.mjs";
 
 export class DepositStore {
   constructor() {
@@ -18,8 +18,9 @@ export class DepositStore {
   }
 
   async create(address) {
-    deposit = new Deposit(address);
+    const deposit = new Deposit(address);
     this.deposits.set(deposit.address, deposit);
+    return deposit;
   }
 
   async read(address) {
