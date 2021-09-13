@@ -4,6 +4,10 @@
   "description": "Auction bot for the Keep Network tBTC coverage pool",
   "repository": "https://github.com/projecttent/keep-auction-bot",
   "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": ">4.1.0",
+    "openzeppelin-solidity": "2.3.0"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
