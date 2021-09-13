@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { DepositStore } from "../app/models/DepositStore.mjs";
-import { Deposit } from "../app/models/Deposit.mjs";
+import { DepositStore } from "../../app/models/DepositStore.mjs";
+import { Deposit } from "../../app/models/Deposit.mjs";
 
 var depositStore;
 
