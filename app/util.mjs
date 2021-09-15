@@ -35,7 +35,7 @@ export function onError(error) {
   }
 }
 
-import { server } from "./app.mjs";
+import { server } from "./server.mjs";
 export function onListening() {
   const addr = server.address();
   const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;

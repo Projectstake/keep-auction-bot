@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "DEBUG=app:* node ./app.mjs"
+    "start": "DEBUG=app:* node ./server.mjs"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

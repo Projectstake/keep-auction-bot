@@ -1,12 +1,9 @@
 import { expect } from "chai";
-import { DepositStore } from "../../app/models/DepositStore.mjs";
 import { Deposit } from "../../app/models/Deposit.mjs";
-
-var depositStore;
+import { depositStore } from "../../app/app.mjs";
 
 describe("DepositStore", function () {
   before(async function () {
-    depositStore = new DepositStore();
     await depositStore.create("1");
     await depositStore.create("2");
     await depositStore.create("3");
