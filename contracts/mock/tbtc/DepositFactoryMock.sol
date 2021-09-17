@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
 import "./DepositMock.sol";
 import "./TBTCSystemMock.sol";
@@ -14,7 +14,9 @@ import {TBTCDepositTokenMock} from "./TBTCDepositTokenMock.sol";
 /// Proxy delegates calls to Deposit and therefore does not affect deposit state.
 /// This means that we only need to deploy the deposit contracts once.
 /// The factory provides clean state for every new deposit clone.
-contract DepositFactoryMock is TBTCSystemAuthorityMock {// is CloneFactory, TBTCSystemAuthority {
+contract DepositFactoryMock is
+    TBTCSystemAuthorityMock // is CloneFactory, TBTCSystemAuthority {
+{
     // Holds the address of the deposit contract
     // which will be used as a master contract for cloning.
     address payable public masterDepositAddress;
@@ -22,7 +24,6 @@ contract DepositFactoryMock is TBTCSystemAuthorityMock {// is CloneFactory, TBTC
     TBTCSystemMock public tbtcSystem;
 
     constructor(address _systemAddress)
-        public
         TBTCSystemAuthorityMock(_systemAddress)
     {}
 
@@ -75,12 +76,12 @@ contract DepositFactoryMock is TBTCSystemAuthorityMock {// is CloneFactory, TBTC
 
         TBTCDepositTokenMock(tbtcDepositToken).mint(
             msg.sender,
-            uint256(cloneAddress)
+            uint256(uint160(cloneAddress))
         );
 
         DepositMock deposit = DepositMock(address(uint160(cloneAddress)));
         deposit.initialize(address(this));
-        deposit.initializeDeposit.value(msg.value)(
+        deposit.initializeDeposit{value: msg.value}(
             tbtcSystem,
             tbtcDepositToken,
             _lotSizeSatoshis

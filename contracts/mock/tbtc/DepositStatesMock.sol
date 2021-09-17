@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
 import {DepositUtilsMock} from "./DepositUtilsMock.sol";
 
@@ -137,11 +137,9 @@ library DepositStatesMock {
         return _d.currentState == uint8(States.ACTIVE);
     }
 
-    function inAwaitingWithdrawalSignature(DepositUtilsMock.DepositMock storage _d)
-        external
-        view
-        returns (bool)
-    {
+    function inAwaitingWithdrawalSignature(
+        DepositUtilsMock.DepositMock storage _d
+    ) external view returns (bool) {
         return _d.currentState == uint8(States.AWAITING_WITHDRAWAL_SIGNATURE);
     }
 
@@ -169,11 +167,9 @@ library DepositStatesMock {
         return _d.currentState == uint8(States.COURTESY_CALL);
     }
 
-    function inFraudLiquidationInProgress(DepositUtilsMock.DepositMock storage _d)
-        external
-        view
-        returns (bool)
-    {
+    function inFraudLiquidationInProgress(
+        DepositUtilsMock.DepositMock storage _d
+    ) external view returns (bool) {
         return _d.currentState == uint8(States.FRAUD_LIQUIDATION_IN_PROGRESS);
     }
 
@@ -193,7 +189,9 @@ library DepositStatesMock {
         return _d.currentState == uint8(States.LIQUIDATED);
     }
 
-    function setAwaitingSignerSetup(DepositUtilsMock.DepositMock storage _d) external {
+    function setAwaitingSignerSetup(DepositUtilsMock.DepositMock storage _d)
+        external
+    {
         _d.currentState = uint8(States.AWAITING_SIGNER_SETUP);
     }
 
@@ -211,9 +209,9 @@ library DepositStatesMock {
         _d.currentState = uint8(States.ACTIVE);
     }
 
-    function setAwaitingWithdrawalSignature(DepositUtilsMock.DepositMock storage _d)
-        external
-    {
+    function setAwaitingWithdrawalSignature(
+        DepositUtilsMock.DepositMock storage _d
+    ) external {
         _d.currentState = uint8(States.AWAITING_WITHDRAWAL_SIGNATURE);
     }
 
@@ -231,9 +229,9 @@ library DepositStatesMock {
         _d.currentState = uint8(States.COURTESY_CALL);
     }
 
-    function setFraudLiquidationInProgress(DepositUtilsMock.DepositMock storage _d)
-        external
-    {
+    function setFraudLiquidationInProgress(
+        DepositUtilsMock.DepositMock storage _d
+    ) external {
         _d.currentState = uint8(States.FRAUD_LIQUIDATION_IN_PROGRESS);
     }
 

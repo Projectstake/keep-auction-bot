@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
 import {TBTCDepositTokenMock} from "./TBTCDepositTokenMock.sol";
 
@@ -23,10 +23,7 @@ contract DepositLogMock {
     TBTCDepositTokenMock tbtcDepositToken;
 
     // This event is fired when we init the deposit
-    event Created(
-        address indexed _depositContractAddress,
-        uint256 _timestamp
-    );
+    event Created(address indexed _depositContractAddress, uint256 _timestamp);
 
     // This log event contains all info needed to rebuild the redemption tx
     // We index on request and signers and digest
@@ -124,7 +121,6 @@ contract DepositLogMock {
 
     /// @notice               Fires a Created event.
     /// @dev                  We append the sender, which is the deposit contract that called.
-    /// @return               True if successful, else revert.
     function logCreated() external {
         require(
             approvedToLog(msg.sender),
@@ -141,7 +137,6 @@ contract DepositLogMock {
     /// @param  _redeemerOutputScript The redeemer's length-prefixed output script.
     /// @param  _requestedFee   The requester or bump-system specified fee.
     /// @param  _outpoint       The 36 byte outpoint.
-    /// @return                 True if successful, else revert.
     function logRedemptionRequested(
         address _requester,
         bytes32 _digest,
@@ -171,9 +166,11 @@ contract DepositLogMock {
     /// @param  _digest signed digest.
     /// @param  _r      signature r value.
     /// @param  _s      signature s value.
-    function logGotRedemptionSignature(bytes32 _digest, bytes32 _r, bytes32 _s)
-        external
-    {
+    function logGotRedemptionSignature(
+        bytes32 _digest,
+        bytes32 _r,
+        bytes32 _s
+    ) external {
         require(
             approvedToLog(msg.sender),
             "Caller is not approved to log events"
@@ -322,6 +319,6 @@ contract DepositLogMock {
     /// @param  _caller     The address of the calling contract.
     /// @return             True if approved, otherwise false.
     function approvedToLog(address _caller) public view returns (bool) {
-        return tbtcDepositToken.exists(uint256(_caller));
+        return tbtcDepositToken.exists(uint256(uint160(_caller)));
     }
 }

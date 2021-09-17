@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
-import {SafeMath} from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import {TBTCSystemMock} from "./TBTCSystemMock.sol";
 import {TBTCDepositTokenMock} from "./TBTCDepositTokenMock.sol";
 import {DepositStatesMock} from "./DepositStatesMock.sol";
 
 library DepositUtilsMock {
-    using SafeMath for uint256;
-    using SafeMath for uint64;
     using DepositStatesMock for DepositUtilsMock.DepositMock;
 
     struct DepositMock {

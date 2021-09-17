@@ -5,8 +5,8 @@
   "repository": "https://github.com/projecttent/keep-auction-bot",
   "license": "MIT",
   "dependencies": {
-    "@openzeppelin/contracts": ">4.1.0",
-    "openzeppelin-solidity": "2.3.0"
+    "@openzeppelin/contracts": "^4.3.2",
+    "@thesis/solidity-contracts": "github:thesis/solidity-contracts#bf514ba"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

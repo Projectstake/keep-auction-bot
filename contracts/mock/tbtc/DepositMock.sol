@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
 import {DepositFundingMock} from "./DepositFundingMock.sol";
 import {DepositLiquidationMock} from "./DepositLiquidationMock.sol";
@@ -45,14 +45,14 @@ contract DepositMock is DepositFactoryAuthorityMock {
     ///      using the `DepositFactory.createDeposit` method, and are clones of
     ///      the constructed deposit. The factory will set the initial values
     ///      for a new clone using `initializeDeposit`.
-    constructor() public {
+    constructor() {
         // The constructed Deposit will never be used, so the deposit factory
         // address can be anything. Clones are updated as per above.
         initialize(address(0xdeadbeef));
     }
 
     /// @notice Deposits do not accept arbitrary ETH.
-    function() external payable {
+    fallback() external {
         require(
             msg.data.length == 0,
             "Deposit contract was called with unknown function selector."

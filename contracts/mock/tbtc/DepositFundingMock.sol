@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
-import {SafeMath} from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import {DepositUtilsMock} from "./DepositUtilsMock.sol";
 import {DepositStatesMock} from "./DepositStatesMock.sol";
 import {OutsourceDepositLoggingMock} from "./OutsourceDepositLoggingMock.sol";
 
 library DepositFundingMock {
-    using SafeMath for uint64;
     using DepositUtilsMock for DepositUtilsMock.DepositMock;
     using DepositStatesMock for DepositUtilsMock.DepositMock;
     using OutsourceDepositLoggingMock for DepositUtilsMock.DepositMock;

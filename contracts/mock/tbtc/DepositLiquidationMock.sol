@@ -1,16 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
-import {SafeMath} from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import {DepositStatesMock} from "./DepositStatesMock.sol";
 import {DepositUtilsMock} from "./DepositUtilsMock.sol";
 import {OutsourceDepositLoggingMock} from "./OutsourceDepositLoggingMock.sol";
 
 library DepositLiquidationMock {
-    using SafeMath for uint256;
-    using SafeMath for uint64;
-
     using DepositUtilsMock for DepositUtilsMock.DepositMock;
     using DepositStatesMock for DepositUtilsMock.DepositMock;
     using OutsourceDepositLoggingMock for DepositUtilsMock.DepositMock;
@@ -22,9 +18,10 @@ library DepositLiquidationMock {
     ///                   see purchaseSignerBondsAtAuction().
     /// @param _wasFraud  True if liquidation is being started due to fraud, false if for any other reason.
     /// @param _d         Deposit storage pointer.
-    function startLiquidation(DepositUtilsMock.DepositMock storage _d, bool _wasFraud)
-        internal
-    {
+    function startLiquidation(
+        DepositUtilsMock.DepositMock storage _d,
+        bool _wasFraud
+    ) internal {
         _d.logStartedLiquidation(_wasFraud);
 
         // If we see fraud in the redemption flow, we shouldn't go to auction.
@@ -45,7 +42,9 @@ library DepositLiquidationMock {
     /// @notice     Notify the contract that the signers are undercollateralized.
     /// @dev        Calls out to the system for oracle info.
     /// @param  _d  Deposit storage pointer.
-    function notifyCourtesyCall(DepositUtilsMock.DepositMock storage _d) external {
+    function notifyCourtesyCall(DepositUtilsMock.DepositMock storage _d)
+        external
+    {
         require(_d.inActive(), "Can only courtesy call from active state");
 
         _d.courtesyCallInitiated = block.timestamp;
@@ -56,7 +55,9 @@ library DepositLiquidationMock {
     /// @notice     Goes from courtesy call to active.
     /// @dev        Only callable if collateral is sufficient and the deposit is not expiring.
     /// @param  _d  Deposit storage pointer.
-    function exitCourtesyCall(DepositUtilsMock.DepositMock storage _d) external {
+    function exitCourtesyCall(DepositUtilsMock.DepositMock storage _d)
+        external
+    {
         require(_d.inCourtesyCall(), "Not currently in courtesy call");
         _d.setActive();
         _d.logExitedCourtesyCall();

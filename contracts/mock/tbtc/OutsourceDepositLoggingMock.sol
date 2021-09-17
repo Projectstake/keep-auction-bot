@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
 import {DepositLogMock} from "./DepositLogMock.sol";
 import {DepositUtilsMock} from "./DepositUtilsMock.sol";
@@ -10,9 +10,7 @@ library OutsourceDepositLoggingMock {
     /// @dev                  `DepositLogMock.logCreated` fires a Created event with
     ///                       msg.sender and block.timestamp.
     ///                       msg.sender will be the calling Deposit's address.
-    function logCreated(DepositUtilsMock.DepositMock storage _d)
-        external
-    {
+    function logCreated(DepositUtilsMock.DepositMock storage _d) external {
         DepositLogMock _logger = DepositLogMock(address(_d.tbtcSystem));
         _logger.logCreated();
     }
@@ -25,7 +23,6 @@ library OutsourceDepositLoggingMock {
     /// @param  _redeemerOutputScript The redeemer's length-prefixed output script.
     /// @param  _requestedFee   The redeemer or bump-system specified fee.
     /// @param  _outpoint       The 36 byte outpoint.
-    /// @return                 True if successful, else revert.
     function logRedemptionRequested(
         DepositUtilsMock.DepositMock storage _d,
         address _redeemer,
@@ -52,7 +49,6 @@ library OutsourceDepositLoggingMock {
     /// @param  _digest Signed digest.
     /// @param  _r      Signature r value.
     /// @param  _s      Signature s value.
-    /// @return         True if successful, else revert.
     function logGotRedemptionSignature(
         DepositUtilsMock.DepositMock storage _d,
         bytes32 _digest,
@@ -94,7 +90,9 @@ library OutsourceDepositLoggingMock {
 
     /// @notice     Fires a FraudDuringSetup event.
     /// @dev        The logger is on a system contract, so all logs from all deposits are from the same address.
-    function logFraudDuringSetup(DepositUtilsMock.DepositMock storage _d) external {
+    function logFraudDuringSetup(DepositUtilsMock.DepositMock storage _d)
+        external
+    {
         DepositLogMock _logger = DepositLogMock(address(_d.tbtcSystem));
         _logger.logFraudDuringSetup();
     }
@@ -110,7 +108,9 @@ library OutsourceDepositLoggingMock {
 
     /// @notice     Fires a CourtesyCalled event.
     /// @dev        The logger is on a system contract, so all logs from all deposits are from the same address.
-    function logCourtesyCalled(DepositUtilsMock.DepositMock storage _d) external {
+    function logCourtesyCalled(DepositUtilsMock.DepositMock storage _d)
+        external
+    {
         DepositLogMock _logger = DepositLogMock(address(_d.tbtcSystem));
         _logger.logCourtesyCalled();
     }
@@ -144,7 +144,9 @@ library OutsourceDepositLoggingMock {
 
     /// @notice     Fires a ExitedCourtesyCall event.
     /// @dev        The logger is on a system contract, so all logs from all deposits are from the same address.
-    function logExitedCourtesyCall(DepositUtilsMock.DepositMock storage _d) external {
+    function logExitedCourtesyCall(DepositUtilsMock.DepositMock storage _d)
+        external
+    {
         DepositLogMock _logger = DepositLogMock(address(_d.tbtcSystem));
         _logger.logExitedCourtesyCall();
     }

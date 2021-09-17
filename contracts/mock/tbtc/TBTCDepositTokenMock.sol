@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.5.0;
+pragma solidity 0.8.4;
 
-import {
-    ERC721Metadata
-} from "openzeppelin-solidity/contracts/token/ERC721/ERC721Metadata.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {DepositFactoryAuthorityMock} from "./DepositFactoryAuthorityMock.sol";
 
 /// @title tBTC Deposit Token for tracking deposit ownership
@@ -21,10 +19,9 @@ import {DepositFactoryAuthorityMock} from "./DepositFactoryAuthorityMock.sol";
 ///      convertible to the deposit's address and vice versa. TDTs are minted
 ///      automatically by the factory during each deposit's initialization. See
 ///      DepositFactory.createNewDeposit() for more info on how the TDT is minted.
-contract TBTCDepositTokenMock is ERC721Metadata, DepositFactoryAuthorityMock {
+contract TBTCDepositTokenMock is ERC721, DepositFactoryAuthorityMock {
     constructor(address _depositFactoryAddress)
-        public
-        ERC721Metadata("tBTC Deposit Token", "TDT")
+        ERC721("tBTC Deposit Token", "TDT")
     {
         initialize(_depositFactoryAddress);
     }
