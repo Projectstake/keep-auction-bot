@@ -78,12 +78,12 @@ describe("Bot contract", () => {
   let addrs;
   let contracts;
 
-  before(async function () {
+  before(async () => {
     contracts = await deployContracts();
     [owner, beneficiary, addr1, ...addrs] = await ethers.getSigners();
   });
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     const Bot = await ethers.getContractFactory("Bot");
     const bot = await Bot.deploy(
       contracts.riskManager.address,

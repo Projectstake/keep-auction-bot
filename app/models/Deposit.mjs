@@ -1,22 +1,26 @@
 export class DepositState {
+  static initialized = new DepositState("initialized");
   static active = new DepositState("active");
-  static enteredLiquidation = new DepositState("enteredLiquidation");
-  static completedLiquidation = new DepositState("completedLiquidation");
-  static exitedLiquidation = new DepositState("exitedLiquidation");
+  static startedLiquidation = new DepositState("startedLiquidation");
+  static liquidated = new DepositState("liquidated");
 
   constructor(name) {
-    this.name = name;
+    this._name = name;
   }
 
   toString() {
-    return `DepositState.${this.name}`;
+    return `DepositState.${this._name}`;
+  }
+
+  get name() {
+    return this._name;
   }
 }
 
 export class Deposit {
   constructor(address) {
     this._address = address;
-    this._state = DepositState.active;
+    this._state = DepositState.initialized;
   }
 
   get address() {

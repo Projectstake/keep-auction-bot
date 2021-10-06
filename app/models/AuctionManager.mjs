@@ -1,19 +1,22 @@
-import { auctionStore } from "../app.mjs";
-import { AuctionState } from "./Auction.mjs";
+import "./AuctionStore.mjs";
+import "./Bot.mjs";
 
 export class AuctionManager {
-  constructor(loggerContract) {
-    this._loggerContract = loggerContract;
+  constructor(auctionStore, contract, bot) {
+    this._auctionStore = auctionStore;
+    this._contract = contract;
+    this._bot = bot;
   }
 
   async listen() {
-    this._loggerContract.on(
+    this._contract.on(
       "AuctionCreated",
       async (tokenAddress, amount, auctionAddress) => {
         auction = await auctionStore.create(address);
       }
     );
-    this._loggerContract.on(
+
+    this._contract.on(
       "AuctionOfferTaken",
       async (
         auctionAddress,
@@ -25,10 +28,9 @@ export class AuctionManager {
         auction = await auctionStore.read(auctionAddress);
       }
     );
-    this._loggerContract.on("AuctionClosed", async (address) => {
+
+    this._contract.on("AuctionClosed", async (address) => {
       auction = await auctionStore.destroy(address);
     });
-
-    console.log("Listening to CoveragePool auction logs");
   }
 }

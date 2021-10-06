@@ -1,9 +1,3 @@
-import { DepositStore } from "./models/DepositStore.mjs";
-export const depositStore = new DepositStore();
-
-import { AuctionStore } from "./models/AuctionStore.mjs";
-export const auctionStore = new AuctionStore();
-
 import { deployBot } from "./contracts.mjs";
 import { Bot } from "./models/Bot.mjs";
 

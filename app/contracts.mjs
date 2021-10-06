@@ -132,6 +132,13 @@ async function deployCoveragePoolContracts(contracts) {
   const masterAuction = await AuctionMock.deploy();
   await masterAuction.deployed();
 
+  const AuctioneerMock = await ethers.getContractFactory("AuctioneerMock");
+  const auctioneer = await AuctioneerMock.deploy(
+    coveragePool.address,
+    masterAuction.address
+  );
+  await auctioneer.deployed();
+
   const AuctionBidderMock = await ethers.getContractFactory(
     "AuctionBidderMock"
   );
@@ -154,6 +161,7 @@ async function deployCoveragePoolContracts(contracts) {
 
   contracts.riskManager = riskManager;
   contracts.auctionBidder = auctionBidder;
+  contracts.auctioneer = auctioneer;
 
   return contracts;
 }

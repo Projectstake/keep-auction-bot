@@ -1,42 +1,55 @@
-import { depositStore } from "../app.mjs";
 import { DepositState } from "./Deposit.mjs";
+import "./DepositStore.mjs";
+import "./Bot.mjs";
 
 export class DepositManager {
-  constructor(loggerContract) {
-    this._loggerContract = loggerContract;
+  constructor(depositStore, contract, bot) {
+    this._depositStore = depositStore;
+    this._contract = contract;
+    this._bot = bot;
   }
 
   async listen() {
-    this._loggerContract.on("Funded", async (address, _txid, _timestamp) => {
-      deposit = await depositStore.create(address);
-    });
-    this._loggerContract.on(
-      "StartedLiquidation",
-      async (address, _wasFraud, _timestamp) => {
-        deposit = await depositStore.read(address);
-        deposit.state = DepositState.enteredLiquidation;
-        // notify riskManager
+    this._contract.on(
+      "Created",
+      async (depositContractAddress, _timestamp, _event) => {
+        await this._depositStore.create(depositContractAddress);
       }
     );
-    this._loggerContract.on("Liquidated", async (address, _timestamp) => {
-      deposit = await depositStore.read(address);
-      deposit.state = DepositState.completedLiquidation;
-      // notify riskManager
-      await depositStore.destroy(deposit.address);
-    });
-    this._loggerContract.on(
-      "ExitedCourtesyCall",
-      async (address, _timestamp) => {
-        deposit = await depositStore.read(address);
-        deposit.state = DepositState.exitedLiquidation;
-        // notify riskManager
+
+    this._contract.on(
+      "Funded",
+      async (depositContractAddress, _txid, _timestamp, _event) => {
+        let deposit = await this._depositStore.read(depositContractAddress);
         deposit.state = DepositState.active;
       }
     );
-    this._loggerContract.on("Redeemed", async (address, _txid, _timestamp) => {
-      deposit = await depositStore.destroy(address);
-    });
 
-    console.log("Listening to tBTC deposit logs");
+    this._contract.on(
+      "StartedLiquidation",
+      async (depositContractAddress, _wasFraud, _timestamp, _event) => {
+        let deposit = await this._depositStore.read(depositContractAddress);
+        deposit.state = DepositState.startedLiquidation;
+        this._bot.handleDepositStartedLiquidation(depositContractAddress);
+      }
+    );
+
+    this._contract.on(
+      "Liquidated",
+      async (depositContractAddress, _timestamp, _event) => {
+        let deposit = await this._depositStore.read(depositContractAddress);
+        deposit.state = DepositState.liquidated;
+        this._bot.handleDepositLiquidated(depositContractAddress);
+        await this._depositStore.destroy(deposit.address);
+      }
+    );
+
+    this._contract.on(
+      "Redeemed",
+      async (depositContractAddress, _txid, _timestamp, _event) => {
+        let deposit = await this._depositStore.read(depositContractAddress);
+        await this._depositStore.destroy(deposit.address);
+      }
+    );
   }
 }
