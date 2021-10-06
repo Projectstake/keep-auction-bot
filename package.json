@@ -6,7 +6,8 @@
   "license": "MIT",
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",
-    "@thesis/solidity-contracts": "github:thesis/solidity-contracts#bf514ba"
+    "@thesis/solidity-contracts": "github:thesis/solidity-contracts#bf514ba",
+    "esm": "^3.2.25"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
