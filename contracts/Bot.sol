@@ -37,6 +37,8 @@ contract Bot is Ownable {
 
     event ReceivedFunds(address, uint256);
     event WithdrewFunds(address, uint256);
+    event NotifiedStartedLiquidation(address);
+    event NotifiedLiquidated(address);
 
     modifier depositInLiquidation(address depositAddress) {
         IDeposit deposit = IDeposit(depositAddress);
@@ -85,12 +87,13 @@ contract Bot is Ownable {
         emit WithdrewFunds(msg.sender, balance);
     }
 
-    function handleDepositLiquidationInProgress(address depositAddress)
+    function handleDepositStartedLiquidation(address depositAddress)
         external
         onlyOwner
         depositInLiquidation(depositAddress)
     {
         riskManager.notifyLiquidation(depositAddress);
+        emit NotifiedStartedLiquidation(depositAddress);
     }
 
     function handleDepositLiquidated(address depositAddress)
@@ -99,6 +102,7 @@ contract Bot is Ownable {
         depositIsLiquidated(depositAddress)
     {
         riskManager.notifyLiquidated(depositAddress);
+        emit NotifiedLiquidated(depositAddress);
     }
 
     receive() external payable {
