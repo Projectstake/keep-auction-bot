@@ -1,17 +1,20 @@
 import hre from "hardhat";
+const { ethers } = hre;
 
-export async function deployContracts() {
-  const DepositStatesMock = await hre.ethers.getContractFactory(
+async function deployTBTCContracts(contracts) {
+  const DepositStatesMock = await ethers.getContractFactory(
     "DepositStatesMock"
   );
   const depositStates = await DepositStatesMock.deploy();
+  await depositStates.deployed();
 
-  const OutsourceDepositLoggingMock = await hre.ethers.getContractFactory(
+  const OutsourceDepositLoggingMock = await ethers.getContractFactory(
     "OutsourceDepositLoggingMock"
   );
   const depositLogging = await OutsourceDepositLoggingMock.deploy();
+  await depositLogging.deployed();
 
-  const DepositFundingMock = await hre.ethers.getContractFactory(
+  const DepositFundingMock = await ethers.getContractFactory(
     "DepositFundingMock",
     {
       libraries: {
@@ -21,8 +24,9 @@ export async function deployContracts() {
     }
   );
   const depositFunding = await DepositFundingMock.deploy();
+  await depositFunding.deployed();
 
-  const DepositLiquidationMock = await hre.ethers.getContractFactory(
+  const DepositLiquidationMock = await ethers.getContractFactory(
     "DepositLiquidationMock",
     {
       libraries: {
@@ -32,85 +36,111 @@ export async function deployContracts() {
     }
   );
   const depositLiquidation = await DepositLiquidationMock.deploy();
+  await depositLiquidation.deployed();
 
-  const DepositMock = await hre.ethers.getContractFactory("DepositMock", {
+  const DepositUtilsMock = await ethers.getContractFactory("DepositUtilsMock");
+  const depositUtils = await DepositUtilsMock.deploy();
+  await depositUtils.deployed();
+
+  const DepositMock = await ethers.getContractFactory("DepositMock", {
     libraries: {
       DepositStatesMock: depositStates.address,
       DepositFundingMock: depositFunding.address,
       DepositLiquidationMock: depositLiquidation.address,
+      DepositUtilsMock: depositUtils.address,
     },
   });
   const deposit = await DepositMock.deploy();
+  await deposit.deployed();
 
-  const DepositUtilsMock = await hre.ethers.getContractFactory(
-    "DepositUtilsMock"
+  const TBTCSystemMock = await ethers.getContractFactory("TBTCSystemMock");
+  const tbtcSystem = await TBTCSystemMock.deploy();
+  await tbtcSystem.deployed();
+
+  const DepositFactoryMock = await ethers.getContractFactory(
+    "DepositFactoryMock"
   );
-  const depositUtils = await DepositUtilsMock.deploy();
+  const depositFactory = await DepositFactoryMock.deploy(tbtcSystem.address);
+  await depositFactory.deployed();
 
-  const TBTCSystemMock = await hre.ethers.getContractFactory("TBTCSystemMock");
+  const TBTCDepositTokenMock = await ethers.getContractFactory(
+    "TBTCDepositTokenMock"
+  );
+  const tbtcDepositToken = await TBTCDepositTokenMock.deploy(
+    depositFactory.address
+  );
+  await tbtcDepositToken.deployed();
+
+  const DepositLogMock = await ethers.getContractFactory("DepositLogMock");
+  const depositLogger = await DepositLogMock.deploy();
+  await depositLogger.deployed();
+
+  const TestToken = await ethers.getContractFactory("TestToken");
+  const tbtcToken = await TestToken.deploy();
+  await tbtcToken.deployed();
+
+  contracts.deposit = deposit;
+  contracts.depositLogging = depositLogging;
+  contracts.depositFactory = depositFactory;
+  contracts.depositLogger = depositLogger;
+  contracts.tbtcDepositToken = tbtcDepositToken;
+  contracts.tbtcSystem = tbtcSystem;
+  contracts.DepositMock = DepositMock;
+
+  return contracts;
+}
+
+async function deployCoveragePoolContracts(contracts) {
+  const TBTCSystemMock = await ethers.getContractFactory("TBTCSystemMock");
   const tbtcSystem = await TBTCSystemMock.deploy();
 
-  const DepositFactoryMock = await hre.ethers.getContractFactory(
+  const DepositFactoryMock = await ethers.getContractFactory(
     "DepositFactoryMock"
   );
   const depositFactory = await DepositFactoryMock.deploy(tbtcSystem.address);
 
-  const TBTCDepositTokenMock = await hre.ethers.getContractFactory(
+  const TBTCDepositTokenMock = await ethers.getContractFactory(
     "TBTCDepositTokenMock"
   );
   const tbtcDepositToken = await TBTCDepositTokenMock.deploy(
     depositFactory.address
   );
 
-  const DepositLogMock = await hre.ethers.getContractFactory("DepositLogMock");
-  const depositLogger = await DepositLogMock.deploy();
-
-  const TestToken = await hre.ethers.getContractFactory("TestToken");
+  const TestToken = await ethers.getContractFactory("TestToken");
   const tbtcToken = await TestToken.deploy();
   await tbtcToken.deployed();
 
-  const UnderwriterToken = await hre.ethers.getContractFactory(
-    "UnderwriterToken"
-  );
+  const UnderwriterToken = await ethers.getContractFactory("UnderwriterToken");
   const underwriterToken = await UnderwriterToken.deploy(
     "Underwriter Token",
     "COV"
   );
   await underwriterToken.deployed();
 
-  const AssetPoolMock = await hre.ethers.getContractFactory("AssetPoolMock");
+  const AssetPoolMock = await ethers.getContractFactory("AssetPoolMock");
   const assetPool = await AssetPoolMock.deploy(
     tbtcToken.address,
     underwriterToken.address
   );
   await assetPool.deployed();
 
-  const CoveragePoolMock = await hre.ethers.getContractFactory(
-    "CoveragePoolMock"
-  );
+  const CoveragePoolMock = await ethers.getContractFactory("CoveragePoolMock");
   const coveragePool = await CoveragePoolMock.deploy(assetPool.address);
   await coveragePool.deployed();
 
-  const AuctionMock = await hre.ethers.getContractFactory("AuctionMock");
+  const AuctionMock = await ethers.getContractFactory("AuctionMock");
   const masterAuction = await AuctionMock.deploy();
   await masterAuction.deployed();
 
-  const AuctionBidderMock = await hre.ethers.getContractFactory(
+  const AuctionBidderMock = await ethers.getContractFactory(
     "AuctionBidderMock"
   );
   const auctionBidder = await AuctionBidderMock.deploy(coveragePool.address);
   await auctionBidder.deployed();
 
-  const AuctioneerMock = await hre.ethers.getContractFactory("AuctioneerMock");
-  const auctioneer = await AuctioneerMock.deploy(
-    coveragePool.address,
-    masterAuction.address
-  );
-  await auctioneer.deployed();
-
   const auctionLength = 86400; // 24h
 
-  const RiskManagerV1Mock = await hre.ethers.getContractFactory(
+  const RiskManagerV1Mock = await ethers.getContractFactory(
     "RiskManagerV1Mock"
   );
   const riskManager = await RiskManagerV1Mock.deploy(
@@ -122,27 +152,29 @@ export async function deployContracts() {
   );
   await riskManager.deployed();
 
-  var contracts = {
-    depositLogger: depositLogger,
-    auctionLogger: auctioneer,
-    riskManager: riskManager,
-    auctionBidder: auctionBidder,
-  };
+  contracts.riskManager = riskManager;
+  contracts.auctionBidder = auctionBidder;
 
-  console.debug(
-    `Initializing TBTCSystem [${tbtcSystem.address}] with:\n` +
-      `  depositStates: ${depositStates.address}\n` +
-      `  depositFunding: ${depositFunding.address}\n` +
-      `  depositLiquidation: ${depositLiquidation.address}\n` +
-      `  depositUtils: ${depositUtils.address}\n` +
-      `  depositFactory: ${depositFactory.address}\n` +
-      `  masterDepositAddress: ${deposit.address}\n` +
-      `  tbtcDepositToken: ${tbtcDepositToken.address}\n` +
-      `  depositLogger: ${depositLogger.address}\n` +
-      `  auctionLogger: ${auctioneer.address}\n` +
-      `  riskManager: ${riskManager.address}\n` +
-      `  auctionBidder: ${auctionBidder.address}\n`
+  return contracts;
+}
+
+export async function deployContracts() {
+  let contracts = {};
+  contracts = await deployTBTCContracts(contracts);
+  contracts = await deployCoveragePoolContracts(contracts);
+  return contracts;
+}
+
+export async function deployBot(beneficiaryAddress) {
+  let contracts = await deployContracts();
+  const Bot = await ethers.getContractFactory("Bot");
+  const bot = await Bot.deploy(
+    contracts.riskManager.address,
+    contracts.auctionBidder.address,
+    beneficiaryAddress
   );
+  await bot.deployed();
+  contracts.bot = bot;
 
   return contracts;
 }
