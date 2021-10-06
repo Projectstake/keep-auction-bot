@@ -15,7 +15,7 @@
 pragma solidity 0.8.4;
 
 import "../../interfaces/IRiskManagerV1.sol";
-import "../../interfaces/IDeposit.sol";
+import "../tbtc/DepositMock.sol";
 import "./AuctioneerMock.sol";
 import "./AuctionMock.sol";
 import "./CoveragePoolConstants.sol";
@@ -112,12 +112,12 @@ contract RiskManagerV1Mock is IRiskManagerV1, AuctioneerMock, Ownable {
     ///         to the notifier's address.
     /// @param  depositAddress liquidating tBTC deposit address
     function notifyLiquidation(address depositAddress) external override {
-        require(
-            tbtcDepositToken.exists(uint256(uint160(depositAddress))),
-            "Address is not a deposit contract"
-        );
+        // require(
+        //     tbtcDepositToken.exists(uint256(uint160(depositAddress))),
+        //     "Address is not a deposit contract"
+        // );
 
-        IDeposit deposit = IDeposit(depositAddress);
+        DepositMock deposit = DepositMock(depositAddress);
         require(
             isDepositLiquidationInProgress(deposit),
             "Deposit is not in liquidation state"
@@ -157,7 +157,7 @@ contract RiskManagerV1Mock is IRiskManagerV1, AuctioneerMock, Ownable {
             "No auction for given deposit"
         );
 
-        IDeposit deposit = IDeposit(depositAddress);
+        DepositMock deposit = DepositMock(depositAddress);
         require(
             deposit.currentState() == DEPOSIT_LIQUIDATED_STATE,
             "Deposit is not in liquidated state"
@@ -179,13 +179,13 @@ contract RiskManagerV1Mock is IRiskManagerV1, AuctioneerMock, Ownable {
     ///      to this contract in order to buy signer bonds.
     /// @param auction Coverage pool auction
     function onAuctionFullyFilled(AuctionMock auction) internal override {
-        IDeposit deposit = IDeposit(auctionToDeposit[address(auction)]);
+        DepositMock deposit = DepositMock(auctionToDeposit[address(auction)]);
 
         delete depositToAuction[address(deposit)];
         delete auctionToDeposit[address(auction)];
     }
 
-    function isDepositLiquidationInProgress(IDeposit deposit)
+    function isDepositLiquidationInProgress(DepositMock deposit)
         internal
         view
         returns (bool)
