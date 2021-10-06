@@ -19,4 +19,12 @@ library DepositUtilsMock {
         // written when we get funded
         uint256 fundedAt; // timestamp when funding proof was received
     }
+
+    uint256 public constant SATOSHI_MULTIPLIER = 10**10; // multiplier to convert satoshi to TBTC token units
+
+    /// @notice         Gets the lot size in erc20 decimal places (max 18)
+    /// @return         uint256 lot size in 10**18 decimals.
+    function lotSizeTbtc(DepositMock storage _d) public view returns (uint256) {
+        return _d.lotSizeSatoshis * SATOSHI_MULTIPLIER;
+    }
 }

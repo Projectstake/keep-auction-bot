@@ -99,11 +99,9 @@ library OutsourceDepositLoggingMock {
 
     /// @notice     Fires a Funded event.
     /// @dev        The logger is on a system contract, so all logs from all deposits are from the same address.
-    function logFunded(DepositUtilsMock.DepositMock storage _d, bytes32 _txid)
-        external
-    {
+    function logFunded(DepositUtilsMock.DepositMock storage _d) external {
         DepositLogMock _logger = DepositLogMock(address(_d.tbtcSystem));
-        _logger.logFunded(_txid);
+        _logger.logFunded();
     }
 
     /// @notice     Fires a CourtesyCalled event.

@@ -235,12 +235,12 @@ contract DepositLogMock {
 
     /// @notice     Fires a Funded event.
     /// @dev        We append the sender, which is the deposit contract that called.
-    function logFunded(bytes32 _txid) external {
+    function logFunded() external {
         require(
             approvedToLog(msg.sender),
             "Caller is not approved to log events"
         );
-        emit Funded(msg.sender, _txid, block.timestamp);
+        emit Funded(msg.sender, 0, block.timestamp);
     }
 
     /// @notice     Fires a CourtesyCalled event.

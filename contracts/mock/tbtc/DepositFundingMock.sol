@@ -29,4 +29,19 @@ library DepositFundingMock {
         _d.setAwaitingSignerSetup();
         _d.logCreated();
     }
+
+    /// @notice                     Anyone may notify the deposit of a funding proof to activate the deposit.
+    ///                             This is the happy-path of the funding flow. It means that we have succeeded.
+    /// @dev                        Takes a pre-parsed transaction and calculates values needed to verify funding.
+    /// @param  _d                  Deposit storage pointer.
+    function provideBTCFundingProof(DepositUtilsMock.DepositMock storage _d)
+        public
+    {
+        require(_d.inAwaitingBTCFundingProof(), "Not awaiting funding");
+
+        _d.fundedAt = block.timestamp;
+
+        _d.setActive();
+        _d.logFunded();
+    }
 }

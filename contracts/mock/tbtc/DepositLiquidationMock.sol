@@ -39,6 +39,18 @@ library DepositLiquidationMock {
         }
     }
 
+    /// @notice     Closes an auction and purchases the signer bonds. Payout to buyer, funder, then signers if not fraud.
+    /// @dev        For interface, reading auctionValue will give a past value. the current is better.
+    /// @param  _d  Deposit storage pointer.
+    function purchaseSignerBondsAtAuction(
+        DepositUtilsMock.DepositMock storage _d
+    ) external {
+        require(_d.inSignerLiquidation(), "No active auction");
+
+        _d.setLiquidated();
+        _d.logLiquidated();
+    }
+
     /// @notice     Notify the contract that the signers are undercollateralized.
     /// @dev        Calls out to the system for oracle info.
     /// @param  _d  Deposit storage pointer.

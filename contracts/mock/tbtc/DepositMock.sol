@@ -67,6 +67,14 @@ contract DepositMock is DepositFactoryAuthorityMock {
         return self.lotSizeSatoshis;
     }
 
+    /// @notice Get this deposit's lot size in TBTC.
+    /// @dev This is the same as lotSizeSatoshis(), but is multiplied to scale
+    ///      to 18 decimal places.
+    /// @return uint256 lot size in TBTC precision (max 18 decimal places).
+    function lotSizeTbtc() external view returns (uint256) {
+        return self.lotSizeTbtc();
+    }
+
     /// @notice Get the integer representing the current state.
     /// @dev We implement this because contracts don't handle foreign enums
     ///      well. See `DepositStatesMock` for more info on states.
@@ -79,6 +87,18 @@ contract DepositMock is DepositFactoryAuthorityMock {
     /// @return True if state is ACTIVE, false otherwise.
     function inActive() external view returns (bool) {
         return self.inActive();
+    }
+
+    //------------------------------ FUNDING FLOW --------------------------------//
+
+    /// @notice Anyone may submit a funding proof to the deposit showing that
+    ///         a transaction was submitted and sufficiently confirmed on the
+    ///         Bitcoin chain transferring the deposit lot size's amount of BTC
+    ///         to the signer-controlled private key corresopnding to this
+    ///         deposit. This will move the deposit into an active state.
+    function provideBTCFundingProof() public {
+        // not external to allow bytes memory parameters
+        self.provideBTCFundingProof();
     }
 
     //---------------------------- LIQUIDATION FLOW ------------------------------//
@@ -129,6 +149,20 @@ contract DepositMock is DepositFactoryAuthorityMock {
         self.notifyUndercollateralizedLiquidation();
     }
 
+    /// @notice Closes an auction and purchases the signer bonds by transferring
+    ///         the lot size in TBTC to the redeemer, if there is one, or to the
+    ///         TDT holder if not. Any bond amount that is not currently up for
+    ///         auction is either made available for the liquidation initiator
+    ///         to withdraw (for fraud) or split 50-50 between the initiator and
+    ///         the signers (for abort or collateralization issues).
+    /// @dev The amount of ETH given for the transferred TBTC can be read using
+    ///      the `auctionValue` function; note, however, that the function's
+    ///      value is only static during the specific block it is queried, as it
+    ///      varies by block timestamp.
+    function purchaseSignerBondsAtAuction() external {
+        self.purchaseSignerBondsAtAuction();
+    }
+
     //--------------------------- MUTATING HELPERS -------------------------------//
 
     /// @notice This function can only be called by the deposit factory; use
@@ -150,5 +184,6 @@ contract DepositMock is DepositFactoryAuthorityMock {
         self.tbtcSystem = _tbtcSystem;
         self.tbtcDepositToken = _tbtcDepositToken;
         self.initialize(_lotSizeSatoshis);
+        self.setAwaitingBTCFundingProof();
     }
 }
