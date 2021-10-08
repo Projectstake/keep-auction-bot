@@ -52,6 +52,16 @@ contract Bot is Ownable {
         uint256 amount,
         uint256 timestamp
     );
+    event WithdrewCurrencyTokens(
+        address indexed recipient,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event WithdrewCollateralTokens(
+        address indexed recipient,
+        uint256 amount,
+        uint256 timestamp
+    );
     event NotifiedStartedLiquidation(
         address indexed deposit,
         uint256 timestamp
@@ -119,6 +129,34 @@ contract Bot is Ownable {
         (bool success, ) = beneficiaryAddress.call{value: balance}("");
         require(success, "Ether withdrawal failed");
         emit WithdrewEther(beneficiaryAddress, balance, block.timestamp);
+    }
+
+    /// @notice Transfers the contract's entire balance of currency tokens to
+    ///         the beneficiary account.
+    /// @dev Can be called only by the contract owner.
+    function withdrawCurrencyToken() external onlyOwner {
+        uint256 balance = IERC20(currencyToken).balanceOf(address(this));
+        require(balance > 0, "Account balance is zero");
+        IERC20(currencyToken).safeTransfer(beneficiaryAddress, balance);
+        emit WithdrewCurrencyTokens(
+            beneficiaryAddress,
+            balance,
+            block.timestamp
+        );
+    }
+
+    /// @notice Transfers the contract's entire balance of collateral tokens to
+    ///         the beneficiary account.
+    /// @dev Can be called only by the contract owner.
+    function withdrawCollateralToken() external onlyOwner {
+        uint256 balance = IERC20(collateralToken).balanceOf(address(this));
+        require(balance > 0, "Account balance is zero");
+        IERC20(collateralToken).safeTransfer(beneficiaryAddress, balance);
+        emit WithdrewCollateralTokens(
+            beneficiaryAddress,
+            balance,
+            block.timestamp
+        );
     }
 
     /// @notice Notifies the RiskManagerV1 contract of a tBTC deposit's pending
