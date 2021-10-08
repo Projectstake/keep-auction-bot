@@ -31,9 +31,11 @@ export class DepositStore {
     }
   }
 
-  async update(address) {
+  async update(address, state) {
     if (this._deposits.has(address)) {
-      return this._deposits.get(address);
+      let deposit = this._deposits.get(address);
+      deposit.state = state;
+      return deposit;
     } else {
       throw new Error(`Deposit ${address} does not exist`);
     }

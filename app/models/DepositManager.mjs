@@ -20,16 +20,20 @@ export class DepositManager {
     this._contract.on(
       "Funded",
       async (depositContractAddress, _txid, _timestamp, _event) => {
-        let deposit = await this._depositStore.read(depositContractAddress);
-        deposit.state = DepositState.active;
+        await this._depositStore.update(
+          depositContractAddress,
+          DepositState.active
+        );
       }
     );
 
     this._contract.on(
       "StartedLiquidation",
       async (depositContractAddress, _wasFraud, _timestamp, _event) => {
-        let deposit = await this._depositStore.read(depositContractAddress);
-        deposit.state = DepositState.startedLiquidation;
+        await this._depositStore.update(
+          depositContractAddress,
+          DepositState.startedLiquidation
+        );
         this._bot.handleDepositStartedLiquidation(depositContractAddress);
       }
     );
@@ -37,18 +41,19 @@ export class DepositManager {
     this._contract.on(
       "Liquidated",
       async (depositContractAddress, _timestamp, _event) => {
-        let deposit = await this._depositStore.read(depositContractAddress);
-        deposit.state = DepositState.liquidated;
+        await this._depositStore.update(
+          depositContractAddress,
+          DepositState.liquidated
+        );
         this._bot.handleDepositLiquidated(depositContractAddress);
-        await this._depositStore.destroy(deposit.address);
+        await this._depositStore.destroy(depositContractAddress);
       }
     );
 
     this._contract.on(
       "Redeemed",
       async (depositContractAddress, _txid, _timestamp, _event) => {
-        let deposit = await this._depositStore.read(depositContractAddress);
-        await this._depositStore.destroy(deposit.address);
+        await this._depositStore.destroy(depositContractAddress);
       }
     );
   }
