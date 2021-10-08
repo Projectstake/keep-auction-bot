@@ -30,13 +30,15 @@ describe("Bot contract", () => {
     });
 
     it("sets an AuctionBidder", async () => {
-      expect(await contracts.bot.bidder()).to.equal(
+      expect(await contracts.bot.auctionBidder()).to.equal(
         contracts.auctionBidder.address
       );
     });
 
     it("sets a beneficiary account", async () => {
-      expect(await contracts.bot.beneficiary()).to.equal(beneficiaryAddress);
+      expect(await contracts.bot.beneficiaryAddress()).to.equal(
+        beneficiaryAddress
+      );
     });
 
     it("sets an owner account", async () => {
@@ -78,14 +80,14 @@ describe("Bot contract", () => {
       expect(await contracts.bot.getBalance()).to.equal(ethValue);
     });
 
-    it("emits a ReceivedFunds event", async () => {
+    it("emits a ReceivedEther event", async () => {
       const ethValue = ethers.utils.parseEther("1");
       await expect(
         await owner.sendTransaction({
           to: contracts.bot.address,
           value: ethValue,
         })
-      ).to.emit(contracts.bot, "ReceivedFunds");
+      ).to.emit(contracts.bot, "ReceivedEther");
     });
   });
 
@@ -99,26 +101,26 @@ describe("Bot contract", () => {
     });
 
     it("fails if called by a non-owner account", async () => {
-      await expect(contracts.bot.connect(addr1).withdraw()).to.be.revertedWith(
-        "Ownable: caller is not the owner"
-      );
+      await expect(
+        contracts.bot.connect(testSigner).withdrawEther()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("succeeds when called by the owner account", async () => {
       await expect(
-        contracts.bot.connect(owner).withdraw()
+        contracts.bot.connect(owner).withdrawEther()
       ).to.not.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("resets the balance to zero", async () => {
-      await contracts.bot.withdraw();
+      await contracts.bot.withdrawEther();
       expect(await contracts.bot.getBalance()).to.equal(0);
     });
 
-    it("emits a WithdrewFunds event", async () => {
-      await expect(await contracts.bot.withdraw()).to.emit(
+    it("emits a WithdrewEther event", async () => {
+      await expect(await contracts.bot.withdrawEther()).to.emit(
         contracts.bot,
-        "WithdrewFunds"
+        "WithdrewEther"
       );
     });
   });

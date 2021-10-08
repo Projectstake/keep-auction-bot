@@ -18,13 +18,13 @@ contract Bot is Ownable {
     IERC20 public immutable currencyToken;
     IERC20 public immutable collateralToken;
     IRiskManagerV1 public immutable riskManager;
-    IAuctionBidder public immutable bidder;
+    IAuctionBidder public immutable auctionBidder;
     address public immutable auctioneerAddress;
 
     // The Bot contract's beneficiary account. Withdrawn funds will be sent to
     // this account. The beneficiary account is set on contract deployment. A
     // new beneficiary account can be set with a call to setBeneficiary().
-    address payable public beneficiary;
+    address payable public beneficiaryAddress;
 
     // See https://github.com/keep-network/tbtc/blob/v1.1.0/solidity/contracts/deposit/DepositStates.sol
     enum DepositState {
@@ -42,10 +42,21 @@ contract Bot is Ownable {
         LIQUIDATED
     }
 
-    event ReceivedFunds(address, uint256);
-    event WithdrewFunds(address, uint256);
-    event NotifiedStartedLiquidation(address);
-    event NotifiedLiquidated(address);
+    event ReceivedEther(
+        address indexed sender,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event WithdrewEther(
+        address indexed recipient,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event NotifiedStartedLiquidation(
+        address indexed deposit,
+        uint256 timestamp
+    );
+    event NotifiedLiquidated(address indexed deposit, uint256 timestamp);
 
     modifier depositInLiquidation(address depositAddress) {
         IDeposit deposit = IDeposit(depositAddress);
@@ -76,49 +87,73 @@ contract Bot is Ownable {
         IRiskManagerV1 _riskManager,
         IAuctionBidder _auctionBidder,
         address _auctioneerAddress,
-        address payable _beneficiary
+        address payable _beneficiaryAddress
     ) {
         currencyToken = _currencyToken;
         collateralToken = _collateralToken;
         riskManager = _riskManager;
-        bidder = _bidder;
+        auctionBidder = _auctionBidder;
         auctioneerAddress = _auctioneerAddress;
-        beneficiary = _beneficiary;
+        beneficiaryAddress = _beneficiaryAddress;
     }
 
-    function setBeneficiary(address payable _beneficiary) external onlyOwner {
-        beneficiary = _beneficiary;
+    function setBeneficiary(address payable _beneficiaryAddress)
+        external
+        onlyOwner
+    {
+        beneficiaryAddress = _beneficiaryAddress;
     }
 
     function getBalance() external view returns (uint256) {
         return address(this).balance;
     }
 
-    function withdraw() external onlyOwner {
+    /// @notice Transfers the contract's entire balance of Ether to the
+    ///         beneficiary account.
+    /// @dev Can be called only by the contract owner.
+    ///      Does not attempt to prevent a reentrancy attack since recipient
+    ///      is presumably a trusted account.
+    function withdrawEther() external onlyOwner {
         uint256 balance = address(this).balance;
-        beneficiary.transfer(balance);
-        emit WithdrewFunds(msg.sender, balance);
+        require(balance > 0, "Account balance is zero");
+        (bool success, ) = beneficiaryAddress.call{value: balance}("");
+        require(success, "Ether withdrawal failed");
+        emit WithdrewEther(beneficiaryAddress, balance, block.timestamp);
     }
 
+    /// @notice Notifies the RiskManagerV1 contract of a tBTC deposit's pending
+    ///         liquidation. In return, the coverage pool will grant the
+    ///         notifying bot a portion of its asset pool (underwriter tokens),
+    ///         if the bot happens to be the first notifier of the liquidation
+    ///         status.
+    /// @dev Can be called only by the contract owner.
+    /// @param depositAddress Address of the liquidated deposit
     function handleDepositStartedLiquidation(address depositAddress)
         external
         onlyOwner
         depositInLiquidation(depositAddress)
     {
         riskManager.notifyLiquidation(depositAddress);
-        emit NotifiedStartedLiquidation(depositAddress);
+        emit NotifiedStartedLiquidation(depositAddress, block.timestamp);
     }
 
+    /// @notice Notifies the RiskManagerV1 contract of a tBTC deposit's
+    ///         liquidation. In return, the coverage pool will grant the
+    ///         notifying bot a portion of its asset pool (underwriter tokens),
+    ///         if the bot happens to be the first notifier of the liquidation
+    ///         status.
+    /// @dev Can be called only by the contract owner.
+    /// @param depositAddress Address of the liquidated deposit
     function handleDepositLiquidated(address depositAddress)
         external
         onlyOwner
         depositIsLiquidated(depositAddress)
     {
         riskManager.notifyLiquidated(depositAddress);
-        emit NotifiedLiquidated(depositAddress);
+        emit NotifiedLiquidated(depositAddress, block.timestamp);
     }
 
     receive() external payable {
-        emit ReceivedFunds(msg.sender, msg.value);
+        emit ReceivedEther(msg.sender, msg.value, block.timestamp);
     }
 }

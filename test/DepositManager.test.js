@@ -189,66 +189,6 @@ describe("DepositMock", () => {
   });
 });
 
-async function parseDepositAddressFromLog(contracts) {
-  const filter = contracts.tbtcSystem.filters.Created(null, null);
-  const eventList = await contracts.tbtcSystem.queryFilter(
-    filter,
-    "latest",
-    "latest"
-  );
-  const event = eventList[0];
-  const depositAddress = event.args[0];
-  return depositAddress;
-}
-
-function sleep(milliseconds) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-// This group of xxxWithDelay() functions call a contract method, then delay a
-// few seconds for ethers.js to poll for events. Ethers.js polls at an interval
-// of four seconds by default.
-// Ref: https://github.com/nomiclabs/hardhat/issues/1692#issuecomment-904904674
-async function createDepositWithDelay(contracts) {
-  const milliseconds = 4200;
-  const tx = await contracts.depositFactory.createDeposit(oneBtc, {
-    value: 10,
-  });
-  await tx.wait();
-  await sleep(milliseconds);
-  return parseDepositAddressFromLog(contracts);
-}
-async function fundDepositWithDelay(deposit) {
-  const milliseconds = 4200;
-  const tx = await deposit.provideBTCFundingProof();
-  await tx.wait();
-  await sleep(milliseconds);
-}
-async function startDepositLiquidationWithDelay(deposit) {
-  const milliseconds = 4200;
-  const tx = await deposit.notifyUndercollateralizedLiquidation();
-  await tx.wait();
-  await sleep(milliseconds);
-}
-async function completeDepositLiquidationWithDelay(deposit) {
-  const milliseconds = 4200;
-  const tx = await deposit.purchaseSignerBondsAtAuction();
-  await tx.wait();
-  await sleep(milliseconds);
-}
-
-async function createDeposit(contracts) {
-  const tx = await contracts.depositFactory.createDeposit(oneBtc, {
-    value: 10,
-  });
-  await tx.wait();
-  return parseDepositAddressFromLog(contracts);
-}
-
-async function attachDepositAddressToContract(contracts, address) {
-  return await contracts.DepositMock.attach(address);
-}
-
 describe("DepositManager", () => {
   let contracts;
   let depositStore;
@@ -397,3 +337,63 @@ describe("DepositManager", () => {
     });
   });
 });
+
+async function parseDepositAddressFromLog(contracts) {
+  const filter = contracts.tbtcSystem.filters.Created(null, null);
+  const eventList = await contracts.tbtcSystem.queryFilter(
+    filter,
+    "latest",
+    "latest"
+  );
+  const event = eventList[0];
+  const depositAddress = event.args[0];
+  return depositAddress;
+}
+
+function sleep(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+// This group of _WithDelay() functions call a contract method, then delay a
+// few seconds for ethers.js to poll for events. Ethers.js polls at an interval
+// of four seconds by default.
+// Ref: https://github.com/nomiclabs/hardhat/issues/1692#issuecomment-904904674
+async function createDepositWithDelay(contracts) {
+  const milliseconds = 4200;
+  const tx = await contracts.depositFactory.createDeposit(oneBtc, {
+    value: 10,
+  });
+  await tx.wait();
+  await sleep(milliseconds);
+  return parseDepositAddressFromLog(contracts);
+}
+async function fundDepositWithDelay(deposit) {
+  const milliseconds = 4200;
+  const tx = await deposit.provideBTCFundingProof();
+  await tx.wait();
+  await sleep(milliseconds);
+}
+async function startDepositLiquidationWithDelay(deposit) {
+  const milliseconds = 4200;
+  const tx = await deposit.notifyUndercollateralizedLiquidation();
+  await tx.wait();
+  await sleep(milliseconds);
+}
+async function completeDepositLiquidationWithDelay(deposit) {
+  const milliseconds = 4200;
+  const tx = await deposit.purchaseSignerBondsAtAuction();
+  await tx.wait();
+  await sleep(milliseconds);
+}
+
+async function createDeposit(contracts) {
+  const tx = await contracts.depositFactory.createDeposit(oneBtc, {
+    value: 10,
+  });
+  await tx.wait();
+  return parseDepositAddressFromLog(contracts);
+}
+
+async function attachDepositAddressToContract(contracts, address) {
+  return await contracts.DepositMock.attach(address);
+}
