@@ -1,3 +1,4 @@
+import { AuctionState } from "./Auction.mjs";
 import "./AuctionStore.mjs";
 import "./Bot.mjs";
 
@@ -11,26 +12,49 @@ export class AuctionManager {
   async listen() {
     this._contract.on(
       "AuctionCreated",
-      async (tokenAddress, amount, auctionAddress) => {
-        auction = await auctionStore.create(address);
+      async (
+        currencyTokenAddress,
+        currencyTokensDesired,
+        auctionContractAddress,
+        _event
+      ) => {
+        await this._auctionStore.create(
+          auctionContractAddress,
+          currencyTokenAddress,
+          currencyTokensDesired
+        );
       }
     );
 
     this._contract.on(
       "AuctionOfferTaken",
       async (
-        auctionAddress,
-        _takerAddress,
-        _tokenAccepted,
-        amount,
-        _portionToSeize
+        auctionContractAddress,
+        _auctionTakerAddress,
+        _currencyTokenAddress,
+        currencyTokensOffered,
+        _collateralTokensReceived,
+        _event
       ) => {
-        auction = await auctionStore.read(auctionAddress);
+        let auction = await this._auctionStore.read(auctionContractAddress);
+        await this._auctionStore.update(
+          auctionContractAddress,
+          auction.amount - currencyTokensOffered,
+          AuctionState.active
+        );
       }
     );
 
-    this._contract.on("AuctionClosed", async (address) => {
-      auction = await auctionStore.destroy(address);
-    });
+    this._contract.on(
+      "AuctionClosed",
+      async (auctionContractAddress, _event) => {
+        // await this._auctionStore.update(
+        //   auctionContractAddress,
+        //   0,
+        //   AuctionState.closed
+        // );
+        await this._auctionStore.destroy(auctionContractAddress);
+      }
+    );
   }
 }

@@ -2,46 +2,49 @@ import { Auction } from "./Auction.mjs";
 
 export class AuctionStore {
   constructor() {
-    this.auctions = new Map();
+    this._auctions = new Map();
   }
 
   async iterator() {
-    return this.auctions.values();
+    return this._auctions.values();
   }
 
   async list() {
-    return [...this.auctions.values()];
+    return [...this._auctions.values()];
   }
 
   async count() {
-    return this.auctions.size;
+    return this._auctions.size;
   }
 
-  async create(address) {
-    const auction = new Auction(address);
-    this.auctions.set(auction.address, auction);
+  async create(address, token, amount) {
+    const auction = new Auction(address, token, amount);
+    this._auctions.set(auction.address, auction);
     return auction;
   }
 
   async read(address) {
-    if (this.auctions.has(address)) {
-      return this.auctions.get(address);
+    if (this._auctions.has(address)) {
+      return this._auctions.get(address);
     } else {
       throw new Error(`Auction ${address} does not exist`);
     }
   }
 
-  async update(address) {
-    if (this.auctions.has(address)) {
-      return this.auctions.get(address);
+  async update(address, amount, state) {
+    if (this._auctions.has(address)) {
+      let auction = this._auctions.get(address);
+      auction.amount = amount;
+      auction.state = state;
+      return auction;
     } else {
       throw new Error(`Auction ${address} does not exist`);
     }
   }
 
   async destroy(address) {
-    if (this.auctions.has(address)) {
-      this.auctions.delete(address);
+    if (this._auctions.has(address)) {
+      this._auctions.delete(address);
     } else {
       throw new Error(`Auction ${address} does not exist`);
     }
