@@ -14,9 +14,9 @@ interface tokenRecipient {
     ) external;
 }
 
-contract TestToken is ERC20 {
-    string public constant NAME = "Test Token";
-    string public constant SYMBOL = "TT";
+contract CollateralToken is ERC20 {
+    string public constant NAME = "Collateral Token";
+    string public constant SYMBOL = "CT";
 
     /* solhint-disable-next-line no-empty-blocks */
     constructor() ERC20(NAME, SYMBOL) {}

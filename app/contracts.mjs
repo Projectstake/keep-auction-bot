@@ -75,14 +75,15 @@ async function deployTBTCContracts(contracts) {
   const depositLogger = await DepositLogMock.deploy();
   await depositLogger.deployed();
 
-  const TestToken = await ethers.getContractFactory("TestToken");
-  const tbtcToken = await TestToken.deploy();
+  const TBTCToken = await ethers.getContractFactory("TBTCToken");
+  const tbtcToken = await TBTCToken.deploy();
   await tbtcToken.deployed();
 
   contracts.deposit = deposit;
   contracts.depositLogging = depositLogging;
   contracts.depositFactory = depositFactory;
   contracts.depositLogger = depositLogger;
+  contracts.tbtcToken = tbtcToken;
   contracts.tbtcDepositToken = tbtcDepositToken;
   contracts.tbtcSystem = tbtcSystem;
   contracts.DepositMock = DepositMock;
@@ -106,9 +107,9 @@ async function deployCoveragePoolContracts(contracts) {
     depositFactory.address
   );
 
-  const TestToken = await ethers.getContractFactory("TestToken");
-  const tbtcToken = await TestToken.deploy();
-  await tbtcToken.deployed();
+  const CollateralToken = await ethers.getContractFactory("CollateralToken");
+  const collateralToken = await CollateralToken.deploy();
+  await collateralToken.deployed();
 
   const UnderwriterToken = await ethers.getContractFactory("UnderwriterToken");
   const underwriterToken = await UnderwriterToken.deploy(
@@ -119,7 +120,7 @@ async function deployCoveragePoolContracts(contracts) {
 
   const AssetPoolMock = await ethers.getContractFactory("AssetPoolMock");
   const assetPool = await AssetPoolMock.deploy(
-    tbtcToken.address,
+    collateralToken.address,
     underwriterToken.address
   );
   await assetPool.deployed();
@@ -151,7 +152,7 @@ async function deployCoveragePoolContracts(contracts) {
     "RiskManagerV1Mock"
   );
   const riskManager = await RiskManagerV1Mock.deploy(
-    tbtcToken.address,
+    contracts.tbtcToken.address,
     tbtcDepositToken.address,
     coveragePool.address,
     masterAuction.address,
@@ -159,6 +160,7 @@ async function deployCoveragePoolContracts(contracts) {
   );
   await riskManager.deployed();
 
+  contracts.collateralToken = collateralToken;
   contracts.riskManager = riskManager;
   contracts.auctionBidder = auctionBidder;
   contracts.auctioneer = auctioneer;
