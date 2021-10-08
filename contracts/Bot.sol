@@ -127,8 +127,11 @@ contract Bot is Ownable {
     /// @notice Makes an offer for an open auction, offering the specified
     ///         amount in currency tokens for, at least, the specified amount of
     ///         collateral tokens. Results in the emission of an `AuctionOfferTaken`
-    ///         event with the contract owner account's address as first argument.
-    ///         Ref: XXX
+    ///         event with the auction contract address as first argument, if successful.
+    ///         Refs:
+    ///         https://github.com/keep-network/coverage-pools/blob/main/contracts/AuctionBidder.sol
+    ///         https://github.com/keep-network/coverage-pools/blob/main/contracts/Auction.sol
+    ///         https://github.com/keep-network/coverage-pools/blob/main/contracts/Auctioneer.sol
     /// @dev Can be called only by the contract owner.
     /// @param auction the auction to bid on
     /// @param bidAmountInCurrencyTokens the amount in currency tokens to offer
