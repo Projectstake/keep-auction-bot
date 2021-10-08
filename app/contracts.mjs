@@ -179,8 +179,11 @@ export async function deployBot(beneficiaryAddress) {
   let contracts = await deployContracts();
   const Bot = await ethers.getContractFactory("Bot");
   const bot = await Bot.deploy(
+    contracts.tbtcToken.address,
+    contracts.collateralToken.address,
     contracts.riskManager.address,
     contracts.auctionBidder.address,
+    contracts.auctioneer.address,
     beneficiaryAddress
   );
   await bot.deployed();

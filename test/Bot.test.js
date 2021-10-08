@@ -1,97 +1,25 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
+const { ethers } = hre;
 
-async function deployContracts() {
-  const TBTCSystemMock = await ethers.getContractFactory("TBTCSystemMock");
-  const tbtcSystem = await TBTCSystemMock.deploy();
-
-  const DepositFactoryMock = await ethers.getContractFactory(
-    "DepositFactoryMock"
-  );
-  const depositFactory = await DepositFactoryMock.deploy(tbtcSystem.address);
-
-  const TBTCDepositTokenMock = await ethers.getContractFactory(
-    "TBTCDepositTokenMock"
-  );
-  const tbtcDepositToken = await TBTCDepositTokenMock.deploy(
-    depositFactory.address
-  );
-
-  const TestToken = await ethers.getContractFactory("TestToken");
-  const tbtcToken = await TestToken.deploy();
-  await tbtcToken.deployed();
-
-  const UnderwriterToken = await ethers.getContractFactory("UnderwriterToken");
-  const underwriterToken = await UnderwriterToken.deploy(
-    "Underwriter Token",
-    "COV"
-  );
-  await underwriterToken.deployed();
-
-  const AssetPoolMock = await ethers.getContractFactory("AssetPoolMock");
-  const assetPool = await AssetPoolMock.deploy(
-    tbtcToken.address,
-    underwriterToken.address
-  );
-  await assetPool.deployed();
-
-  const CoveragePoolMock = await ethers.getContractFactory("CoveragePoolMock");
-  const coveragePool = await CoveragePoolMock.deploy(assetPool.address);
-  await coveragePool.deployed();
-
-  const AuctionMock = await ethers.getContractFactory("AuctionMock");
-  const masterAuction = await AuctionMock.deploy();
-  await masterAuction.deployed();
-
-  const AuctionBidderMock = await ethers.getContractFactory(
-    "AuctionBidderMock"
-  );
-  const auctionBidder = await AuctionBidderMock.deploy(coveragePool.address);
-  await auctionBidder.deployed();
-
-  const auctionLength = 86400; // 24h
-
-  const RiskManagerV1Mock = await ethers.getContractFactory(
-    "RiskManagerV1Mock"
-  );
-  const riskManager = await RiskManagerV1Mock.deploy(
-    tbtcToken.address,
-    tbtcDepositToken.address,
-    coveragePool.address,
-    masterAuction.address,
-    auctionLength
-  );
-  await riskManager.deployed();
-
-  var contracts = {
-    riskManager: riskManager,
-    auctionBidder: auctionBidder,
-  };
-
-  return contracts;
-}
+require = require("esm")(module);
+const { deployBot } = require("../app/contracts.mjs");
 
 describe("Bot contract", () => {
   let owner;
-  let beneficiary;
-  let addr1;
-  let addrs;
+  let testSigner;
   let contracts;
+  let beneficiaryAddress;
 
   before(async () => {
-    contracts = await deployContracts();
-    [owner, beneficiary, addr1, ...addrs] = await ethers.getSigners();
+    owner = await ethers.getSigner(0);
+    testSigner = await ethers.getSigner(1);
+    const beneficiary = await ethers.getSigner(2);
+    beneficiaryAddress = beneficiary.address;
   });
 
   beforeEach(async () => {
-    const Bot = await ethers.getContractFactory("Bot");
-    const bot = await Bot.deploy(
-      contracts.riskManager.address,
-      contracts.auctionBidder.address,
-      beneficiary.address
-    );
-    await bot.deployed();
-    contracts.bot = bot;
+    contracts = await deployBot(beneficiaryAddress);
   });
 
   describe("initialization", () => {
@@ -108,7 +36,7 @@ describe("Bot contract", () => {
     });
 
     it("sets a beneficiary account", async () => {
-      expect(await contracts.bot.beneficiary()).to.equal(beneficiary.address);
+      expect(await contracts.bot.beneficiary()).to.equal(beneficiaryAddress);
     });
 
     it("sets an owner account", async () => {
@@ -119,19 +47,21 @@ describe("Bot contract", () => {
   describe("setBeneficiary", () => {
     it("fails if called by a non-owner account", async () => {
       await expect(
-        contracts.bot.connect(addr1).setBeneficiary(addr1.address)
+        contracts.bot.connect(testSigner).setBeneficiary(testSigner.address)
       ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("succeeds when called by the owner account", async () => {
       await expect(
-        contracts.bot.connect(owner).setBeneficiary(addr1.address)
+        contracts.bot.connect(owner).setBeneficiary(testSigner.address)
       ).to.not.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("sets a new beneficiary account", async () => {
-      await contracts.bot.setBeneficiary(addr1.address);
-      expect(addr1.address).to.equal(await contracts.bot.beneficiary());
+      await contracts.bot.setBeneficiary(testSigner.address);
+      expect(testSigner.address).to.equal(
+        await contracts.bot.beneficiaryAddress()
+      );
     });
   });
 

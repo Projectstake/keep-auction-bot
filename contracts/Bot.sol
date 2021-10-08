@@ -2,17 +2,24 @@
 
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IAuction.sol";
 import "./interfaces/IAuctionBidder.sol";
 import "./interfaces/IDeposit.sol";
 import "./interfaces/IRiskManagerV1.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /// @title Bot
 /// @notice The auction bot contract that bids on deposit auctions.
 contract Bot is Ownable {
+    using SafeERC20 for IERC20;
+
+    IERC20 public immutable currencyToken;
+    IERC20 public immutable collateralToken;
     IRiskManagerV1 public immutable riskManager;
     IAuctionBidder public immutable bidder;
+    address public immutable auctioneerAddress;
 
     // The Bot contract's beneficiary account. Withdrawn funds will be sent to
     // this account. The beneficiary account is set on contract deployment. A
@@ -64,12 +71,18 @@ contract Bot is Ownable {
     }
 
     constructor(
+        IERC20 _currencyToken,
+        IERC20 _collateralToken,
         IRiskManagerV1 _riskManager,
-        IAuctionBidder _bidder,
+        IAuctionBidder _auctionBidder,
+        address _auctioneerAddress,
         address payable _beneficiary
     ) {
+        currencyToken = _currencyToken;
+        collateralToken = _collateralToken;
         riskManager = _riskManager;
         bidder = _bidder;
+        auctioneerAddress = _auctioneerAddress;
         beneficiary = _beneficiary;
     }
 
