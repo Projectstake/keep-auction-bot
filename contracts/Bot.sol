@@ -62,6 +62,12 @@ contract Bot is Ownable {
         uint256 amount,
         uint256 timestamp
     );
+    event MadeOffer(
+        address indexed auction,
+        uint256 amount,
+        uint256 minAmountToAccept,
+        uint256 timestamp
+    );
     event NotifiedStartedLiquidation(
         address indexed deposit,
         uint256 timestamp
@@ -116,6 +122,44 @@ contract Bot is Ownable {
 
     function getBalance() external view returns (uint256) {
         return address(this).balance;
+    }
+
+    /// @notice Makes an offer for an open auction, offering the specified
+    ///         amount in currency tokens for, at least, the specified amount of
+    ///         collateral tokens. Results in the emission of an `AuctionOfferTaken`
+    ///         event with the contract owner account's address as first argument.
+    ///         Ref: XXX
+    /// @dev Can be called only by the contract owner.
+    /// @param auction the auction to bid on
+    /// @param bidAmountInCurrencyTokens the amount in currency tokens to offer
+    /// @param minAmountInCollateralTokens the minimum amount in collateral tokens to accept
+    function makeOffer(
+        IAuction auction,
+        uint256 bidAmountInCurrencyTokens,
+        uint256 minAmountInCollateralTokens
+    ) external onlyOwner {
+        uint256 balance = currencyToken.balanceOf(address(this));
+        require(
+            balance >= bidAmountInCurrencyTokens,
+            "Account balance is zero"
+        );
+        require(auction.isOpen(), "Auction is closed");
+        IERC20(currencyToken).safeApprove(auctioneerAddress, 0);
+        IERC20(currencyToken).safeIncreaseAllowance(
+            auctioneerAddress,
+            bidAmountInCurrencyTokens
+        );
+        auctionBidder.takeOfferWithMin(
+            auction,
+            bidAmountInCurrencyTokens,
+            minAmountInCollateralTokens
+        );
+        emit MadeOffer(
+            address(auction),
+            bidAmountInCurrencyTokens,
+            minAmountInCollateralTokens,
+            block.timestamp
+        );
     }
 
     /// @notice Transfers the contract's entire balance of Ether to the

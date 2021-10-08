@@ -33,6 +33,10 @@ export class Bot {
     this._contract.handleDepositLiquidated(depositAddress);
   }
 
+  async bid(auctionAddress, bidAmount, minCollateral) {
+    this._contract.makeOffer(auctionAddress, bidAmount, minCollateral);
+  }
+
   get depositStore() {
     return this._depositStore;
   }
